@@ -69,7 +69,8 @@ def check_time_interval(tasks: list[dict]) -> list[dict]:
         time_interval = int(task['task_interval'])
         task_delta_interval = (dt.now() - task['last_start']).seconds
         is_working_hours = check_working_hours(task)
-        if task_delta_interval - 2 > time_interval and is_working_hours and task['task_id'] not in TASK_ID_IGNOR:
+        if (task_delta_interval > time_interval + (0.1 * time_interval) and is_working_hours
+                and task['task_id'] not in TASK_ID_IGNOR):
             logger.info(f"Найдена ошибка в интервале запуска задачи: {task['task_id']}")
             alert += [{
                 'task_id': task['task_id'],
