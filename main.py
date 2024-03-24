@@ -118,6 +118,10 @@ def monitor_tasks():
     if list_alert:
         notif_alert(list_alert)
 
+    # Записываем время выполнения в Google таблицу
+    time_end = dt.now().strftime('%Y-%m-%d %H:%M:%S')
+    wk_g.set_tasks_last_start(6, time_end)
+
 
 if __name__ == "__main__":
     logger.info("Начало")
