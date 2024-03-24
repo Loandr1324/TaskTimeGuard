@@ -26,6 +26,7 @@ AUTH_GOOGLE: dict = {
     'KEY_WORKBOOK': 'id вашей google таблицы'
 }
 FILE_NAME_LOG: str = 'имя вашего лог файла'
+TASK_ID_IGNOR: list = ['идентификатор задачи1 для пропуска', 'идентификатор задачи2 для пропуска']
 ```
 Так же в папке проекта должен [services/google_table](services/google_table) необходимо расположить файл 
 `credentials.json` с параметрами подключения к Google таблице

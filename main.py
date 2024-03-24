@@ -1,7 +1,7 @@
 # Author Loik Andrey mail: loikand@mail.ru
 from typing import List, Any
 
-from config import FILE_NAME_LOG
+from config import FILE_NAME_LOG, TASK_ID_IGNOR
 from loguru import logger
 from datetime import datetime as dt
 
@@ -69,7 +69,7 @@ def check_time_interval(tasks: list[dict]) -> list[dict]:
         time_interval = int(task['task_interval'])
         task_delta_interval = (dt.now() - task['last_start']).seconds
         is_working_hours = check_working_hours(task)
-        if task_delta_interval - 2 > time_interval and is_working_hours:
+        if task_delta_interval - 2 > time_interval and is_working_hours and task['task_id'] not in TASK_ID_IGNOR:
             logger.info(f"Найдена ошибка в интервале запуска задачи: {task['task_id']}")
             alert += [{
                 'task_id': task['task_id'],
