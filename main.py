@@ -3,7 +3,7 @@ from typing import List, Any
 
 from config import FILE_NAME_LOG, TASK_ID_IGNOR
 from loguru import logger
-from datetime import datetime as dt
+import datetime as dt
 
 from services.google_table.google_tb_work import WorkGoogle
 from services.telegram.send_teleg import NotifTelegram
@@ -67,9 +67,11 @@ def check_time_interval(tasks: list[dict]) -> list[dict]:
     alert: list[dict] = []
     for task in tasks:
         time_interval = int(task['task_interval'])
-        task_delta_interval = (dt.now() - task['last_start']).seconds
+        task_delta_interval = (dt.datetime.now() - task['last_start']).seconds
         is_working_hours = check_working_hours(task)
-        if (task_delta_interval > time_interval + (0.1 * time_interval) and is_working_hours
+
+        # Проверяем, что скрипт пропустил уже 3 допустимых интервала запуска и сейчас рабочее время этого скрипта
+        if (task_delta_interval > time_interval * 3 and is_working_hours
                 and task['task_id'] not in TASK_ID_IGNOR):
             logger.info(f"Найдена ошибка в интервале запуска задачи: {task['task_id']}")
             alert += [{
@@ -91,12 +93,14 @@ def check_working_hours(task):
         Ключ принимает значение True, если интервал с последнего запуска уже прошёл.
         Ключ принимает значение False, если интервал с последнего запуска ещё не прошёл.
     """
-    # delta = td(seconds=0)
-    date_now = dt.now()
+    delta = dt.timedelta(seconds=20)
+    date_now = dt.datetime.now()
     time_now = date_now.time()
 
+    # Добавляем delta к старту задачи(погрешность на работу скрипта)
+    start_time = (dt.datetime.combine(dt.date(1, 1, 1), task['time_start']) + delta).time()
+
     # Проверяем возможен ли запуск выполнения задачи в текущее время
-    start_time = task['time_start']
     end_time = task['time_finish']
     if start_time < end_time:
         is_working_hours = (start_time <= time_now <= end_time)
@@ -120,7 +124,7 @@ def monitor_tasks():
         notif_alert(list_alert)
 
     # Записываем время выполнения в Google таблицу
-    time_end = dt.now().strftime('%Y-%m-%d %H:%M:%S')
+    time_end = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     wk_g.set_tasks_last_start(6, time_end)
 
 
